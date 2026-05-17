@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lista de Tareas - To-Do List</title>
+    <style>
+        * { box-sizing: border-box; }
+        
+        body {
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Roboto, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            width: 100%;
+            max-width: 500px;
+            padding: 30px;
+            animation: slideIn 0.5s ease-out;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        h1 {
+            color: #667eea;
+            text-align: center;
+            margin: 0 0 10px 0;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .subtitle {
+            text-align: center;
+            color: #999;
+            margin-bottom: 25px;
+            font-size: 0.9em;
+        }
+        
+        .input-container {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 25px;
+        }
+        
+        #tareaInput {
+            flex: 1;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: border-color 0.3s;
+        }
+        
+        #tareaInput:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        .btn-agregar {
+            padding: 12px 25px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-agregar:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.6);
+        }
+        
+        .btn-agregar:active {
+            transform: translateY(0);
+        }
+        
+        .filtros {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .btn-filtro {
+            padding: 8px 16px;
+            border: 2px solid #e0e0e0;
+            background: white;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: all 0.3s;
+            color: #666;
+            font-weight: 500;
+        }
+        
+        .btn-filtro.activo {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+        
+        .btn-filtro:hover {
+            border-color: #667eea;
+        }
+        
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            padding: 15px;
+            background: #f5f5f5;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .stat-item {
+            flex: 1;
+        }
+        
+        .stat-number {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #667eea;
+        }
+        
+        .stat-label {
+            font-size: 0.8em;
+            color: #999;
+            margin-top: 5px;
+        }
+        
+        .lista-tareas {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .lista-tareas::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        .lista-tareas::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+        
+        .lista-tareas::-webkit-scrollbar-thumb {
+            background: #667eea;
+            border-radius: 10px;
+        }
+        
+        .tarea-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 15px;
+            background: #f9f9f9;
+            border-left: 4px solid #667eea;
+            border-radius: 6px;
+            margin-bottom: 10px;
+            transition: all 0.3s;
+            animation: fadeIn 0.3s ease-out;
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateX(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        .tarea-item:hover {
+            background: #f0f0f0;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .tarea-item.completada {
+            opacity: 0.6;
+            border-left-color: #4caf50;
+        }
+        
+        .tarea-item.completada .tarea-texto {
+            text-decoration: line-through;
+            color: #999;
+        }
+        
+        .checkbox {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            accent-color: #667eea;
+        }
+        
+        .tarea-texto {
+            flex: 1;
+            color: #333;
+            word-break: break-word;
+        }
+        
+        .btn-eliminar {
+            background: #ff6b6b;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.85em;
+            transition: all 0.3s;
+            font-weight: bold;
+        }
+        
+        .btn-eliminar:hover {
+            background: #ee5a52;
+            transform: scale(1.05);
+        }
+        
+        .lista-vacia {
+            text-align: center;
+            color: #999;
+            padding: 40px 20px;
+            font-size: 1.1em;
+        }
+        
+        .acciones-globales {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .btn-accion {
+            flex: 1;
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            background: white;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9em;
+            font-weight: bold;
+            transition: all 0.3s;
+            color: #666;
+        }
+        
+        .btn-accion:hover {
+            border-color: #667eea;
+            color: #667eea;
+        }
+        
+        .btn-limpiar {
+            background: #ff6b6b;
+            color: white;
+            border-color: #ff6b6b;
+        }
+        
+        .btn-limpiar:hover {
+            background: #ee5a52;
+            border-color: #ee5a52;
+        }
+        
+        .mensaje {
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            text-align: center;
+            font-weight: bold;
+            animation: slideIn 0.3s ease-out;
+        }
+        
+        .mensaje.exito {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .mensaje.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px;
+            }
+            
+            h1 {
+                font-size: 2em;
+            }
+            
+            .input-container {
+                flex-direction: column;
+            }
+            
+            .btn-agregar {
+                width: 100%;
+            }
+            
+            .acciones-globales {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📋 Mis Tareas</h1>
+        <p class="subtitle">Organiza tu día con esta lista de tareas</p>
+        
+        <div id="mensaje"></div>
+        
+        <div class="input-container">
+            <input 
+                type="text" 
+                id="tareaInput" 
+                placeholder="Escribe una nueva tarea..." 
+                autocomplete="off"
+            >
+            <button class="btn-agregar" onclick="agregarTarea()">Agregar ➕</button>
+        </div>
+        
+        <div class="filtros">
+            <button class="btn-filtro activo" onclick="filtrar('todas')">Todas</button>
+            <button class="btn-filtro" onclick="filtrar('pendientes')">Pendientes</button>
+            <button class="btn-filtro" onclick="filtrar('completadas')">Completadas</button>
+        </div>
+        
+        <div class="stats">
+            <div class="stat-item">
+                <div class="stat-number" id="totalTareas">0</div>
+                <div class="stat-label">Total</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number" id="completadas">0</div>
+                <div class="stat-label">Completadas</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number" id="pendientes">0</div>
+                <div class="stat-label">Pendientes</div>
+            </div>
+        </div>
+        
+        <ul class="lista-tareas" id="listaTareas"></ul>
+        
+        <div class="acciones-globales">
+            <button class="btn-accion" onclick="marcarTodasCompletadas()">✓ Marcar todas</button>
+            <button class="btn-accion btn-limpiar" onclick="limpiarCompletadas()">🗑️ Limpiar completadas</button>
+        </div>
+    </div>
+
+    <script>
+        const tareaInput = document.getElementById('tareaInput');
+        const listaTareas = document.getElementById('listaTareas');
+        const mensajeDiv = document.getElementById('mensaje');
+        let filtroActual = 'todas';
+        const CLAVE_LOCAL_STORAGE = 'tareas_list';
+
+        // Cargar tareas al abrir la página
+        document.addEventListener('DOMContentLoaded', () => {
+            cargarTareas();
+            actualizarStats();
+            tareaInput.focus();
+        });
+
+        // Permitir agregar tarea con Enter
+        tareaInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                agregarTarea();
+            }
+        });
+
+        function agregarTarea() {
+            const texto = tareaInput.value.trim();
+            
+            if (!texto) {
+                mostrarMensaje('Por favor escribe una tarea', 'error');
+                tareaInput.focus();
+                return;
+            }
+
+            if (texto.length > 200) {
+                mostrarMensaje('La tarea es muy larga (máximo 200 caracteres)', 'error');
+                return;
+            }
+
+            const nuevaTarea = {
+                id: Date.now(),
+                texto: texto,
+                completada: false,
+                fecha: new Date().toLocaleDateString('es-ES')
+            };
+
+            let tareas = obtenerTareas();
+            tareas.push(nuevaTarea);
+            guardarTareas(tareas);
+
+            tareaInput.value = '';
+            tareaInput.focus();
+            mostrarMensaje('✓ Tarea agregada exitosamente', 'exito');
+            renderizarTareas();
+            actualizarStats();
+        }
+
+        function eliminarTarea(id) {
+            if (confirm('¿Estás seguro de que deseas eliminar esta tarea?')) {
+                let tareas = obtenerTareas();
+                tareas = tareas.filter(t => t.id !== id);
+                guardarTareas(tareas);
+                mostrarMensaje('✓ Tarea eliminada', 'exito');
+                renderizarTareas();
+                actualizarStats();
+            }
+        }
+
+        function toggleTarea(id) {
+            let tareas = obtenerTareas();
+            const tarea = tareas.find(t => t.id === id);
+            if (tarea) {
+                tarea.completada = !tarea.completada;
+                guardarTareas(tareas);
+                renderizarTareas();
+                actualizarStats();
+            }
+        }
+
+        function marcarTodasCompletadas() {
+            let tareas = obtenerTareas();
+            const pendientes = tareas.filter(t => !t.completada);
+            
+            if (pendientes.length === 0) {
+                mostrarMensaje('Todas las tareas ya están completadas', 'error');
+                return;
+            }
+
+            tareas = tareas.map(t => ({...t, completada: true}));
+            guardarTareas(tareas);
+            mostrarMensaje('✓ Todas las tareas marcadas como completadas', 'exito');
+            renderizarTareas();
+            actualizarStats();
+        }
+
+        function limpiarCompletadas() {
+            let tareas = obtenerTareas();
+            const completadas = tareas.filter(t => t.completada);
+            
+            if (completadas.length === 0) {
+                mostrarMensaje('No hay tareas completadas para limpiar', 'error');
+                return;
+            }
+
+            if (confirm(`¿Deseas eliminar ${completadas.length} tarea(s) completada(s)?`)) {
+                tareas = tareas.filter(t => !t.completada);
+                guardarTareas(tareas);
+                mostrarMensaje(`✓ ${completadas.length} tarea(s) eliminada(s)`, 'exito');
+                renderizarTareas();
+                actualizarStats();
+            }
+        }
+
+        function filtrar(tipo) {
+            filtroActual = tipo;
+            
+            // Actualizar botones activos
+            document.querySelectorAll('.btn-filtro').forEach(btn => {
+                btn.classList.remove('activo');
+            });
+            event.target.classList.add('activo');
+            
+            renderizarTareas();
+        }
+
+        function renderizarTareas() {
+            let tareas = obtenerTareas();
+
+            // Aplicar filtro
+            if (filtroActual === 'pendientes') {
+                tareas = tareas.filter(t => !t.completada);
+            } else if (filtroActual === 'completadas') {
+                tareas = tareas.filter(t => t.completada);
+            }
+
+            listaTareas.innerHTML = '';
+
+            if (tareas.length === 0) {
+                listaTareas.innerHTML = '<div class="lista-vacia">📭 No hay tareas aquí</div>';
+                return;
+            }
+
+            tareas.forEach(tarea => {
+                const li = document.createElement('li');
+                li.className = `tarea-item ${tarea.completada ? 'completada' : ''}`;
+                li.innerHTML = `
+                    <input 
+                        type="checkbox" 
+                        class="checkbox" 
+                        ${tarea.completada ? 'checked' : ''}
+                        onchange="toggleTarea(${tarea.id})"
+                    >
+                    <span class="tarea-texto">${escaparHTML(tarea.texto)}</span>
+                    <button class="btn-eliminar" onclick="eliminarTarea(${tarea.id})">Eliminar</button>
+                `;
+                listaTareas.appendChild(li);
+            });
+        }
+
+        function actualizarStats() {
+            const tareas = obtenerTareas();
+            const completadas = tareas.filter(t => t.completada).length;
+            const pendientes = tareas.filter(t => !t.completada).length;
+
+            document.getElementById('totalTareas').textContent = tareas.length;
+            document.getElementById('completadas').textContent = completadas;
+            document.getElementById('pendientes').textContent = pendientes;
+        }
+
+        function mostrarMensaje(texto, tipo) {
+            mensajeDiv.textContent = texto;
+            mensajeDiv.className = `mensaje ${tipo}`;
+            
+            setTimeout(() => {
+                mensajeDiv.textContent = '';
+                mensajeDiv.className = '';
+            }, 3000);
+        }
+
+        function obtenerTareas() {
+            const tareas = localStorage.getItem(CLAVE_LOCAL_STORAGE);
+            return tareas ? JSON.parse(tareas) : [];
+        }
+
+        function guardarTareas(tareas) {
+            localStorage.setItem(CLAVE_LOCAL_STORAGE, JSON.stringify(tareas));
+        }
+
+        function cargarTareas() {
+            renderizarTareas();
+        }
+
+        function escaparHTML(texto) {
+            const div = document.createElement('div');
+            div.textContent = texto;
+            return div.innerHTML;
+        }
+    </script>
+</body>
+</html>
